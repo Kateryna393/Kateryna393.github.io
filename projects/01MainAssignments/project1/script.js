@@ -1,29 +1,29 @@
-let len = 10;
-let bg;
+let textX = 'INTERACTION  DESIGN';
+let fontSize = 45;
+let speed = 0.05;
+let textAmplitude = 20;
 
-function setup() {
-	createCanvas(windowWidth,windowHeight);
-	background(0);
-	frameRate(30);
-	rectMode(CENTER);
-	bg = color(10, 200, 58);
+
+
+function setup () {
+  createCanvas(600, 600); 
+  textFont('Georgia'); 
+  textSize(fontSize); 
+  textAlign(CENTER, CENTER);
+  
 }
 
-function  draw() {
-	background(bg);
-	noFill();
-	strokeWeight(5);
-	stroke(20,250, 40);
-	
-	rect(pmouseX, pmouseY, len, len)
-  //height - mouseY mirrors the object along y axis
-	rect(pmouseX, height - pmouseY, len, len)
-	//increase the lenght by 1px every frame
-	len++;
-	
-	if(mouseIsPressed) {
-		len = 0;  
-		bg = color(89, 30, 33);
-	}
-}
+function draw() {
+  background(0); 
+  fill( random(255), random(255), random(255) ); 
+  
+  let startX = width / 2 - textWidth(textX) / 2; 
+  
+  for (let i = 0; i < textX.length; i++) {
+    let charX = startX + textWidth(textX.substring(0, i)) + textWidth(textX[i]) / 2; 
+    
+    let charY = height / 2 + sin((frameCount * speed) + i) * textAmplitude; 
 
+    text(textX[i], charX, charY); 
+}
+}
