@@ -1,42 +1,101 @@
-let textX = 'INTERACTION';
-let fontSize = 20;
-let speed = 0.02;
-let textAmplitude = 50;
-let waveStretch = 0.7;
-let spacing = 20;
- 
-function setup () {  
-  createCanvas(600, 600); 
-  myFont = loadFont("venus rising rg.otf"); 
-  textSize(fontSize); 
-	textFont(myFont);
-  textAlign(CENTER, CENTER);
+let font;
+let bounds;
+let movement = [];
+let c1, c2, c3;
+let exploding = false;
+
+function preload() {
+  font = loadFont("outward-block.ttf"); // note that this font is in the files section, you will need to add a new otf file to use other fonts
+}
+
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+
+  c1 = color('#89fc00'); 
+  c2 = color('#dc0073'); 
+  c3 = color('#008bf8'); 
+
+
+  let rawPoints = font.textToPoints("ERROR", 0, 0, 200, {
+    sampleFactor: 4, // we can add more or less points here.
+    simplifyThreshold: 0,
+  });
+  bounds = font.textBounds("ERROR", 0, 0, 200);
+
+	
+for (let p of rawPoints) {
+    for (let i = 0; i < 3; i++) {
+      movement.push({
+        x: p.x,
+        y: p.y,
+        shiftX: random(-3, 3), 
+        shiftY: random(-3, 3),
+        seed: random(1000),
+		  baseSize: 3, 
+		  currentSize: 3, 
+		  speedX: 0,
+		  speedY:0
+		  
+      });
+    }
+  }
 }
 
 function draw() {
-	background(0, 10);
+  background(0);
+  fill(255);
+  noStroke();
+  let scaleFactor = 0.8;
+  // very messy code block to center text
+  let scaleW = (width / bounds.w) * scaleFactor;
+  let scaleH = (height / bounds.h) * scaleFactor;
+ 
+  let fontX = -bounds.x * scaleW + width / 2 - (bounds.w * scaleW) / 2;
+  let fontY = -bounds.y * scaleH + height / 2 - (bounds.h * scaleH) / 2;
 
-  let startX = width / 4 - textWidth(textX) / 4;
-	let totalWidth = 0;
-	
-	//colors
-	for (let i = 0; i < textX.length; i++) {
-		  let colorShift = frameCount * 0.01 + i;
-	    let r = map(sin(frameCount * 0.01 +  i), -1, 1, 100, 255);
-      let g = map(sin(frameCount * 0.015 +i), -1, 1, 100, 255);
-      let b = map(sin(frameCount * 0.02 + i), -1, 1, 100, 255);
-      fill(r, g, b);
   
-	//calculate the position
-  let charX = startX + textWidth(textX.substring(0, i)) + textWidth(textX[i]) / 2 + i * spacing;
-  let charY = height / 2 + sin((frameCount * speed) + i * waveStretch) * textAmplitude; 
-
-  text(textX[i], charX, charY); 
-}
-}
-	function keyPressed() {
-  if (key = ' ') {
-    textAmplitude = random(20, 100);
-  }
+  translate(fontX, fontY);
+  // end of very messy code block
 	
+  for (let i = 0; i < movement.length; i++) {
+    let m = movement[i];
+	  
+    let nx = noise(m.seed + frameCount * 0.03);
+    let ny = noise(m.seed + 1000 + frameCount * 0.03);
+
+    let x = m.x * scaleW + map(nx, 0, 1, -20, 20) + m.shiftX;
+    let y = m.y * scaleH + map(ny, 0, 1, -20, 20) + m.shiftY;
+
+	 if (exploding) {
+      if (m.speedX === 0 && m.speedY === 0) {
+        m.speedX = random(-3, 3);
+        m.speedY = random(-3, 3);
+      }
+      m.x += m.speedX;
+      m.y += m.speedY;
+    }
+
+
+	let targetSize = map(mouseX, 0, width, m.baseSize, 1);
+    m.currentSize = lerp(m.currentSize, targetSize, 0.1);
+
+	  
+    // color
+    let colFactor = map(m.currentSize, 1, m.baseSize, 0, 1);
+	  let finalColor;
+
+    if (colFactor < 0.5) {
+      finalColor = lerpColor(c1, c2, (colFactor* 2));
+    } else {
+      finalColor = lerpColor(c2, c3, (colFactor- 0.5) * 2);
+    }
+
+      fill(finalColor);
+
+    circle(x, y, m.currentSize);
+  }
+}
+function mousePressed() {
+  exploding = true;
 }

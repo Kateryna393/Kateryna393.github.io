@@ -1,93 +1,129 @@
-let selectedColor;
-let paintFlowX = 0;
+let PosX;
+let PosY;
+let topY;
+let bottomY;
+let dragging = false;
+let trail = [];
+let myFont;
 
-function preload () {
-  myFont = loadFont("venus rising rg.otf"); 
+function preload() {
+  myFont = loadFont('SchibstedGrotesk-VariableFont_wght.ttf');
 }
 
 function setup() {
-  createCanvas(400, 600);
-  selectedColor = color(255);
-  textAlign(CENTER, CENTER);
-  background(30);
+  createCanvas(windowWidth, windowHeight);
+  
+ topY = height * 0.15;
+  bottomY = height * 0.75;
+
+  PosX = width - width * 0.05;  
+  PosY = bottomY;
+
 }
-	
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+
+  topY = height * 0.15;
+  bottomY = height * 0.75;
+
+  PosX = width - width * 0.05;
+  PosY = constrain(PosY, topY, bottomY);
+}
+
 function draw() {
-	
-	drawColorPicker();
-	
-  // gradient size
-  gradientWidth = 250;
-  gradientHeight = 20;
-  gradientX = (width - gradientWidth) / 2;
-  gradientY = (height - gradientHeight) / 2;
+  background(0, 20);
+  drawWaves();
+ drawSlider();
+	drawText();
+}
 
- //shadow
- // fill(0, 0, 0, 50);
- // noStroke();
- // rect(gradientX + 10, gradientY + 10, gradientWidth, gradientHeight);
-	
-	// draw rectangle around the lamp and text
-	fill(30);
-  noStroke(); 
-  rect(gradientX - 20, gradientY - 10, gradientWidth + 40, gradientHeight + 20); 
-	
-	fill(30);
-  noStroke();
-  rect(25, height - 135, 75*2, 45*2 + 10);
 
-  // gradient color
+function drawText() {
+  push();
+  fill(255); 
   noStroke();
-  for (let i = 0; i < gradientWidth; i++) {
-    let r = map(sin((i + paintFlowX) * 0.02), -1, 1, 40, 240);
-    let g = map(sin((i + paintFlowX) * 0.02 + PI / 3), -1, 1, 40, 240);
-    let b = map(sin((i + paintFlowX) * 0.02 + (2 * PI) / 3), -1, 1, 40, 240);
-    let c = color(r, g, b);
-    fill(c);
-    rect(gradientX + i, gradientY, 1, gradientHeight);
+  textAlign(LEFT, TOP);
+  textFont(myFont);
+  textSize(14);
+  text("sound indicator / move the slider", 25, 25);
+  pop();
+}
+
+//slider
+function drawSlider() {
+  
+  if (mouseIsPressed && mouseX > width*0.9) {
+    PosY = constrain(mouseY, topY, bottomY);
+    dragging = true;
+
+
+	  trail.push({y: PosY, alpha: 255}); 
+    if (trail.length > 500) trail.shift();
+  } else {
+    dragging = false;
   }
-	 
-  // animate the flow of paint
-  paintFlowX = (paintFlowX + 2) % gradientWidth;
 
-  // draw lamp handles
-  handleWidth = 25;
-  handleHeight = 9;
+  strokeWeight(width * 0.02);
+  stroke(22);
+  line(PosX, topY, PosX, bottomY);
 
-  // left handle
-  fill(180);
-  rect( gradientX - handleWidth / 2, gradientY + gradientHeight / 2 - handleHeight / 2, handleWidth, handleHeight );
+  
+  for (let i = trail.length - 1; i >= 0; i--) {
+    let t = trail[i];
+    let r = map(sin(frameCount * 0.05 + t.y * 0.05), -1, 1, 100, 255);
+    let g = map(sin(frameCount * 0.03 + t.y * 0.05), -1, 1, 50, 200);
+    let b = map(sin(frameCount * 0.04 + t.y * 0.05), -1, 1, 150, 255);
+    stroke(r, g, b);
+    line(PosX, t.y, PosX, bottomY);
+    if (PosY >= bottomY) {
+        t.alpha -= 6;
+        if (t.alpha <= 0) trail.splice(i, 1);
+    }
+}
+let fillR = map(sin(frameCount * 0.05 + PosY * 0.05), -1, 1, 100, 255);
+  let fillG = map(sin(frameCount * 0.03 + PosY * 0.05), -1, 1, 50, 200);
+  let fillB = map(sin(frameCount * 0.04 + PosY * 0.05), -1, 1, 150, 255);
 
-  // right handle
-  rect( gradientX + gradientWidth - handleWidth / 2, gradientY + gradientHeight / 2 - handleHeight / 2, handleWidth, handleHeight );
+fill(fillR, fillG, fillB); 
+  stroke(255);         
+  strokeWeight(1); 
+  ellipse(PosX, PosY, width * 0.035);
 
-  // display the selected color
-  fill(selectedColor);
+	let sliderValue = floor(map(PosY, topY, bottomY, 100, 0));
+  fill(255); 
   noStroke();
-  rect(50, height - 100, 100, 50);
-	
-	//text color
-	fill(255);
-  textSize(10);
+  textAlign(CENTER, CENTER);
 	textFont(myFont);
-  text("Selected Color", 100, height - 120);
+  textSize(width * 0.012);
+  text(sliderValue+ "%", PosX, PosY);
+
 }
 
-function drawColorPicker() {
-    noStroke();
-    fill(selectedColor);
-    ellipse(mouseX, mouseY, 20, 20);
-}
+	//flower
+function drawWaves() {
+  noFill();
 
-function mousePressed() {
+  let numCircles = 16;              
+  let circle = 240;                  
+  let maxSize = map(PosY, topY, bottomY, max(width, height) * 2, 100);
+
+for (let i = 0; i < numCircles; i++) {
+   let r = map(sin(frameCount*0.02 + i*0.1), -1, 1, 100, 255);
+    let g = map(sin(frameCount*0.03 + i*0.2), -1, 1, 50, 200);
+    let b = map(sin(frameCount*0.04 + i*0.3), -1, 1, 150, 255);
+    stroke(r, g, b); 
+    strokeWeight(1); 
 	
-	if ( mouseX > gradientX && mouseX < gradientX + gradientWidth &&
-    mouseY > gradientY && mouseY < gradientY + gradientHeight ) {
+let size = (frameCount + i * (circle / numCircles)) % circle;
+size = map(size, 0, circle, 0, maxSize); 
 	
-	  let r = map(sin((PI + paintFlowX) * 0.02), -1, 1, 40, 240);
-    let g = map(sin((PI + paintFlowX) * 0.02 + PI / 3), -1, 1, 40, 240);
-    let b = map(sin((PI + paintFlowX) * 0.02 + (2 * PI) / 3), -1, 1, 40, 240);
-    selectedColor = color(r, g, b);
+beginShape();
+    for (let a = 0; a < TWO_PI; a += 0.1) {
+      let w = sin(a*6 + frameCount*0.05) * 15;
+      let x = width/2 + cos(a) * (size/2 + w);
+      let y = height/2 + sin(a) * (size/2 + w);
+      vertex(x, y);
+    }
+    endShape(CLOSE);
+  }
 }
-}
-
