@@ -5,7 +5,7 @@ let c1, c2, c3;
 let exploding = false;
 
 function preload() {
-  font = loadFont("outward-block.ttf"); // note that this font is in the files section, you will need to add a new otf file to use other fonts
+  font = loadFont("outward-block.ttf");
 }
 
 
@@ -18,12 +18,12 @@ function setup() {
 
 
   let rawPoints = font.textToPoints("ERROR", 0, 0, 200, {
-    sampleFactor: 4, // we can add more or less points here.
+    sampleFactor: 4, 
     simplifyThreshold: 0,
   });
   bounds = font.textBounds("ERROR", 0, 0, 200);
 
-	
+//points	
 for (let p of rawPoints) {
     for (let i = 0; i < 3; i++) {
       movement.push({
@@ -46,17 +46,18 @@ function draw() {
   background(0);
   fill(255);
   noStroke();
+	//text position
   let scaleFactor = 0.8;
-  // very messy code block to center text
+  
   let scaleW = (width / bounds.w) * scaleFactor;
   let scaleH = (height / bounds.h) * scaleFactor;
  
-  let fontX = -bounds.x * scaleW + width / 2 - (bounds.w * scaleW) / 2;
+  let fontX = -bounds.x * scaleW + width / 2 - (bounds.w * scaleW)/ 2;
   let fontY = -bounds.y * scaleH + height / 2 - (bounds.h * scaleH) / 2;
 
   
   translate(fontX, fontY);
-  // end of very messy code block
+  
 	
   for (let i = 0; i < movement.length; i++) {
     let m = movement[i];
@@ -68,11 +69,12 @@ function draw() {
     let y = m.y * scaleH + map(ny, 0, 1, -20, 20) + m.shiftY;
 
 	 if (exploding) {
+		 
       if (m.speedX === 0 && m.speedY === 0) {
         m.speedX = random(-3, 3);
         m.speedY = random(-3, 3);
       }
-      m.x += m.speedX;
+    m.x += m.speedX;
       m.y += m.speedY;
     }
 

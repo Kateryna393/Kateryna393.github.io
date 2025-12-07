@@ -1,8 +1,6 @@
-let PosX;
-let PosY;
-let topY;
-let bottomY;
-let dragging = false;
+let PosX, PosY;
+let topY, bottomY;
+let drag = false;
 let trail = [];
 let myFont;
 
@@ -54,13 +52,13 @@ function drawSlider() {
   
   if (mouseIsPressed && mouseX > width*0.9) {
     PosY = constrain(mouseY, topY, bottomY);
-    dragging = true;
+    drag = true;
 
 
 	  trail.push({y: PosY, alpha: 255}); 
     if (trail.length > 500) trail.shift();
   } else {
-    dragging = false;
+    drag = false;
   }
 
   strokeWeight(width * 0.02);
@@ -75,25 +73,26 @@ function drawSlider() {
     let b = map(sin(frameCount * 0.04 + t.y * 0.05), -1, 1, 150, 255);
     stroke(r, g, b);
     line(PosX, t.y, PosX, bottomY);
+	  
     if (PosY >= bottomY) {
         t.alpha -= 6;
         if (t.alpha <= 0) trail.splice(i, 1);
     }
 }
-let fillR = map(sin(frameCount * 0.05 + PosY * 0.05), -1, 1, 100, 255);
-  let fillG = map(sin(frameCount * 0.03 + PosY * 0.05), -1, 1, 50, 200);
-  let fillB = map(sin(frameCount * 0.04 + PosY * 0.05), -1, 1, 150, 255);
+  let r1 = map(sin(frameCount * 0.05 + PosY * 0.05), -1, 1, 100, 255);
+  let g1 = map(sin(frameCount * 0.03 + PosY * 0.05), -1, 1, 50, 200);
+  let b1 = map(sin(frameCount * 0.04 + PosY * 0.05), -1, 1, 150, 255);
 
-fill(fillR, fillG, fillB); 
-  stroke(255);         
-  strokeWeight(1); 
-  ellipse(PosX, PosY, width * 0.035);
+fill(r1, g1, b1); 
+stroke(255);         
+strokeWeight(1); 
+ellipse(PosX, PosY, width * 0.035);
 
-	let sliderValue = floor(map(PosY, topY, bottomY, 100, 0));
+let sliderValue = floor(map(PosY, topY, bottomY, 100, 0));
   fill(255); 
   noStroke();
   textAlign(CENTER, CENTER);
-	textFont(myFont);
+  textFont(myFont);
   textSize(width * 0.012);
   text(sliderValue+ "%", PosX, PosY);
 
@@ -103,8 +102,7 @@ fill(fillR, fillG, fillB);
 function drawWaves() {
   noFill();
 
-  let numCircles = 16;              
-  let circle = 240;                  
+  let numCircles = 16;                                
   let maxSize = map(PosY, topY, bottomY, max(width, height) * 2, 100);
 
 for (let i = 0; i < numCircles; i++) {
@@ -114,8 +112,8 @@ for (let i = 0; i < numCircles; i++) {
     stroke(r, g, b); 
     strokeWeight(1); 
 	
-let size = (frameCount + i * (circle / numCircles)) % circle;
-size = map(size, 0, circle, 0, maxSize); 
+let size = (frameCount + i * (240 / numCircles)) % 240;
+size = map(size, 0, 240, 0, maxSize); 
 	
 beginShape();
     for (let a = 0; a < TWO_PI; a += 0.1) {
